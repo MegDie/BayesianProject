@@ -21,8 +21,8 @@ rownames(data) <- 1:111
 #second step : process u et v into dichotomous samples
 
 #u process
-#first class [1, 31]
-#second class (31, 168]
+#first class [1, 31] #0
+#second class (31, 168] #1
 
 u <- rep(0, length(data$Ozone))
 for (i in 1:length(data$Ozone)){
@@ -33,8 +33,8 @@ for (i in 1:length(data$Ozone)){
 }
 
 #v process
-#first class [57, 79]
-#second class (79, 97]
+#first class [57, 79] #0
+#second class (79, 97] #1
 
 v <- rep(0, length(data$Temp))
 for (i in 1:length(data$Temp)){
@@ -43,3 +43,16 @@ for (i in 1:length(data$Temp)){
   }
   else v[i] <- v[i]
 }
+
+#last sample we care about for our contingency table
+#month
+
+df <- cbind(u,v, data$Month)
+
+#contingency table 
+cont <- table(df[,1], df[,2], df[,3])
+
+#else we just copy the table in instructions
+
+copy <- cbind(c(17,0,6,1),c(4,2,1,2),c(2,3,0,21),c(5,3,3,12),c(18,2,1,8))
+
