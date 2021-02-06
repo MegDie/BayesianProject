@@ -1,0 +1,80 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\documentclass[french,12pt]{report}
+%Some packages I commonly use.
+%\usepackage[english]{babel}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{framed}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{enumerate}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[top=1 in,bottom=1in, left=1 in, right=1 in]{geometry}
+\usepackage{systeme}
+\usepackage{hyperref} 
+\usepackage[
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+ 
+%A bunch of definitions that make my life easier
+\newcommand{\matlab}{{\sc Matlab} }
+\newcommand{\cvec}[1]{{\mathbf #1}}
+\newcommand{\rvec}[1]{\vec{\mathbf #1}}
+\newcommand{\ihat}{\hat{\textbf{\i}}}
+\newcommand{\jhat}{\hat{\textbf{\j}}}
+\newcommand{\khat}{\hat{\textbf{k}}}
+\newcommand{\minor}{{\rm minor}}
+\newcommand{\trace}{{\rm trace}}
+\newcommand{\spn}{{\rm Span}}
+\newcommand{\rem}{{\rm rem}}
+\newcommand{\ran}{{\rm range}}
+\newcommand{\range}{{\rm range}}
+\newcommand{\mdiv}{{\rm div}}
+\newcommand{\proj}{{\rm proj}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\<}{\langle}
+\renewcommand{\>}{\rangle}
+\renewcommand{\emptyset}{\varnothing}
+\newcommand{\attn}[1]{\textbf{#1}}
+\theoremstyle{definition}
+\newtheorem*{remark}{Remarque}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem*{definition}{Definition}
+\newtheorem*{example}{Example}
+\newtheorem*{note}{Note}
+\newtheorem{exercise}{Exercise}
+\newcommand{\bproof}{\bigskip {\bf Proof. }}
+\newcommand{\eproof}{\hfill\qedsymbol}
+\newcommand{\Disp}{\displaystyle}
+
+\setlength{\columnseprule}{1 pt}
+
+
+\begin{document}
+
+\textbf{\textit{Question 1 : }} \\ \\
+
+On a : $$ log(\mu_i)=x_i^T\beta$$
+
+Or nous avons $$l(\mu/y)=\prod_{i=1}^n \frac{1}{y_i}(\mu_i^{y_i}exp(-\mu_i)) $$ 
+et on a $$ log(\mu_i)=x_i^T\beta$$
+On applique maintenant la formule de Bayes: 
+$$\pi(\beta,X) = \pi(\beta/X)\pi(X)$$
+$$\pi(\beta/y) \propto l(\beta/y)\pi(\beta) $$
+$$\propto \prod_{i=1}^n \frac{1}{y_i} \exp(y_i X_i^T\beta)\exp(-\exp(X_i^T\beta))\frac{\sqrt{n}}{\sqrt{2\pi}} (X¨TX)^{\frac{1}{2}} \exp(-\frac{1}{2}(X_i^TX^TXX_i) $$
+$$\propto (X^TX)^{\frac{1}{2}}\exp(\sum_{i=1}^n y_i X_i^T\beta-\exp(\x_i^T\beta-\frac{1}{2}X_i^T(X^TX)X_i)$$
+\end{document}
