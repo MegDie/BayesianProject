@@ -1,8 +1,3 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
-
-\documentclass{article}
-\usepackage[utf8]{inputenc}
 \documentclass[french,12pt]{report}
 %Some packages I commonly use.
 %\usepackage[english]{babel}
@@ -20,6 +15,7 @@
 \usepackage[top=1 in,bottom=1in, left=1 in, right=1 in]{geometry}
 \usepackage{systeme}
 \usepackage{hyperref} 
+\usepackage{dsfont}
 \usepackage[
 backend=biber,
 style=alphabetic,
@@ -62,9 +58,98 @@ sorting=ynt
 \newcommand{\Disp}{\displaystyle}
 
 \setlength{\columnseprule}{1 pt}
+\frenchsetup{StandardLists=true}
+
+\addbibresource{biblio.bib}
+
 
 
 \begin{document}
+
+\begin{titlepage}
+
+\begin{figure}
+     \begin{minipage}{0.4\textwidth}
+         \begin{flushleft}
+             \includegraphics[scale=0.7]{univ.png}
+             
+         \end{flushleft}
+     \end{minipage}
+     \hfill
+     \begin{minipage}{0.4\textwidth}
+         \begin{flushright}
+             \includegraphics[scale=0.3]{IAE.png}
+          
+         \end{flushright}
+     \end{minipage}
+\end{figure}
+
+
+\vspace{4cm}
+
+\center
+\textsc{\LARGE Master 2 MIND/SIAD}\\
+\vspace{1cm}
+\textrm{\textbf{Statistique Computationnelle}}
+
+\rule{\linewidth}{1pt}\\[0.4cm]
+
+\huge {Projet 4 : Inférence bayésienne pour un modèle log-linéaire }
+\rule{\linewidth}{1pt}\\[0.5cm]
+
+ 
+ 
+
+
+
+
+\vspace{1cm}
+
+\Large Proposé par : \\[0.5cm]
+
+\LARGE \textbf{Jean-Michel Marin}\\
+
+
+
+
+
+
+     
+
+
+
+
+ 
+\vspace{1cm}
+
+\Large Fait par : \\[0.9cm]
+
+
+\LARGE \textbf{Mégane} \textsc{ \textbf{Dieval}}\\  
+\vspace{0.5cm}
+\LARGE \textbf{Ibrahim} \textsc{ \textbf{Gaizi}}\\
+\vspace{0.5cm}
+\LARGE \textbf{Oumayma} \textsc{ \textbf{Khalifi}}\\     
+
+
+  
+
+\centering
+
+
+
+
+     
+
+
+
+
+\end{titlepage}
+
+
+
+
+
 
 \textbf{\textit{Question 1 : }} \\ \\
 
@@ -77,4 +162,11 @@ $$\pi(\beta,X) = \pi(\beta/X)\pi(X)$$
 $$\pi(\beta/y) \propto l(\beta/y)\pi(\beta) $$
 $$\propto \prod_{i=1}^n \frac{1}{y_i} \exp(y_i X_i^T\beta)\exp(-\exp(X_i^T\beta))\frac{\sqrt{n}}{\sqrt{2\pi}} (X¨TX)^{\frac{1}{2}} \exp(-\frac{1}{2}(X_i^TX^TXX_i) $$
 $$\propto (X^TX)^{\frac{1}{2}}\exp(\sum_{i=1}^n y_i X_i^T\beta-\exp(\x_i^T\beta-\frac{1}{2}X_i^T(X^TX)X_i)$$
+
+
+
 \end{document}
+
+
+
+
