@@ -67,22 +67,22 @@ X <- matrix(data = 0, nrow = 20, ncol = 16)
 colnames(X) <- c('X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8',
                  'X9', 'X10', 'X11', 'X12', 'X13', 'X14', 'X15', 'X16')
 
-X[1,1] <- 1 #y1 est la seule donnée qui est dans l'intercept
-#le reste est à 0 dans X1
-#X2 est l'indicatrice pour la deuxième modalité de ozone
-#Les 10 dernières données y11 à y20 sont dans ozo2
+X[1,1] <- 1 #y1 est la seule donn?e qui est dans l'intercept
+#le reste est ? 0 dans X1
+#X2 est l'indicatrice pour la deuxi?me modalit? de ozone
+#Les 10 derni?res donn?es y11 ? y20 sont dans ozo2
 X[11:20,2] <- c(rep(1, 10))
-#X3 est l'indicatrice pour la deuxième modalité de temp
-#les 6 à 10ème et 16 à 20ème valeurs sont dans temp2
+#X3 est l'indicatrice pour la deuxi?me modalit? de temp
+#les 6 ? 10?me et 16 ? 20?me valeurs sont dans temp2
 X[6:10, 3] <- c(rep(1, 5))
 X[16:20, 3] <- c(rep(1, 5))
-#X4 correspond à la deuxième modalité de month
+#X4 correspond ? la deuxi?me modalit? de month
 X[c(2,7,12,17),4] <- c(rep(1,4))
-#X5 correspond à la troisième modalité de month
+#X5 correspond ? la troisi?me modalit? de month
 X[c(3,8,13,18),5] <- c(rep(1,4))
-#X6 correspond à la quatrième modalité de month
+#X6 correspond ? la quatri?me modalit? de month
 X[c(4,9,14,19),6] <- c(rep(1,4))
-#X7 correspond à la cinquième modalité de month
+#X7 correspond ? la cinqui?me modalit? de month
 X[c(5,10,15,20),7] <- c(rep(1,4))
 #X8 interactions entre ozo2 et temp 2
 X[16:20, 8] <- c(rep(1,5))
@@ -104,6 +104,23 @@ X[c(9,19), 15] <- c(1,1)
 X[c(10,20), 16] <- c(1,1)
 
 
+n=20
+variance <- function(x){
+  
+  return(n*solve(t(x)%*%x))
+}
+
+#la densitÃ© Ã  priori
+priori <- function(mu, sigma, y,X){
+  
+  k <- ncol(sigma)
+  dmn <- exp((-1/2)*as.matrix(t(y-mu))%*%solve(sigma)%*%as.matrix(y- mu))/sqrt(((2*pi)^k)*det(sigma))  
+  return(dmn)
+}
+mcor <- variance(X)
+mcor
+A=rep(0, 16)
+priori(A, mcor,y, X)
 
 
 
