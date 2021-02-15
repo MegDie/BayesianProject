@@ -111,16 +111,17 @@ variance <- function(x){
 }
 
 #la densité à priori
-priori <- function(mu, sigma, y,X){
+#c est un vecteur de taille 16
+priori <- function(mu, sigma,c,X){
   
   k <- ncol(sigma)
-  dmn <- exp((-1/2)*as.matrix(t(y-mu))%*%solve(sigma)%*%as.matrix(y- mu))/sqrt(((2*pi)^k)*det(sigma))  
+  dmn <- exp((-1/2)*as.matrix(t(c-mu))%*%solve(sigma)%*%as.matrix(c- mu))/sqrt(((2*pi)^k)*det(sigma))  
   return(dmn)
 }
 mcor <- variance(X)
 mcor
 A=rep(0, 16)
-priori(A, mcor,y, X)
+priori(A, mcor,c, X)
 
 
 
