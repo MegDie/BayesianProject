@@ -25,9 +25,9 @@ data <- cbind(data$Ozone, data$Temp, data$Month)
 #first class [1, 31] #0
 #second class (31, 168] #1
 
-u <- rep(0, length(data$Ozone))
-for (i in 1:length(data$Ozone)){
-  if (data$Ozone[i]>31) 
+u <- rep(0, length(data[,1]))
+for (i in 1:length(data[,1])){
+  if (data[i,1]>31) 
   {u[i] <- 1
     }
   else u[i] <- u[i]
@@ -37,9 +37,9 @@ for (i in 1:length(data$Ozone)){
 #first class [57, 79] #0
 #second class (79, 97] #1
 
-v <- rep(0, length(data$Temp))
-for (i in 1:length(data$Temp)){
-  if (data$Temp[i]>79) 
+v <- rep(0, length(data[,2]))
+for (i in 1:length(data[,2])){
+  if (data[i,2]>79) 
   {v[i] <- 1
   }
   else v[i] <- v[i]
@@ -48,7 +48,7 @@ for (i in 1:length(data$Temp)){
 #last sample we care about for our contingency table
 #month
 
-df <- cbind(u,v, data$Month)
+df <- cbind(u,v, data[,3])
 
 #contingency table 
 cont <- table(df[,1], df[,2], df[,3])
@@ -104,25 +104,43 @@ X[c(9,19), 15] <- c(1,1)
 X[c(10,20), 16] <- c(1,1)
 
 
+#initialisation 
 n=20
-variance <- function(x){
-  
-  return(n*solve(t(x)%*%x))
+p=16
+Var <- n*solve(t(X)%*%X)
+mean <- rep(0,16)
+Niter <- 200
+
+#target 
+
+cible <- function(x){
+  A <- (-1/(2*n))*t(x)%*%t(X)%*%X%*%x
+  for (i in 1:n){
+    A <- A + t(X[i,])%*%x%*%y[i] - exp(t(X[i,]%*%x))
+  }
+  dens <- exp(A)
+  return(dens)
 }
 
-#la densité à priori
-#c est un vecteur de taille 16
-priori <- function(mu, sigma,c,X){
-  
-  k <- ncol(sigma)
-  dmn <- exp((-1/2)*as.matrix(t(c-mu))%*%solve(sigma)%*%as.matrix(c- mu))/sqrt(((2*pi)^k)*det(sigma))  
-  return(dmn)
-}
-mcor <- variance(X)
-mcor
-A=rep(0, 16)
-priori(A, mcor,c, X)
+#beta initialization
+mod <- summary(glm(y~-1+X,family=poisson()))
 
+Bchap <- mod$coeff[,1]
+Schap <- mod$cov.unscaled
+
+#Beta initialization
+Beta <- matrix(0,Niter,16)
+Beta[1,] <- rep(0,16)
+
+library(MASS)
+
+for (i in 2:Niter){
+  Beta_tilde <- mvrnorm(1,mean,Var)
+  rho <- cible(Beta_tilde)/cible(Beta[i-1,])
+  U <- runif(1)
+  if (U<=rho) Beta[i,]<-Beta_tilde
+  else Beta[i,]=Beta[i-1,]
+  if (i==Niter) print(Beta[Niter,])}
 
 
 
