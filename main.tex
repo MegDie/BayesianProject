@@ -23,6 +23,9 @@ sorting=ynt
 ]{biblatex}
  
 %A bunch of definitions that make my life easier
+\usepackage{listings}
+\usepackage{amsfonts}
+
 \newcommand{\matlab}{{\sc Matlab} }
 \newcommand{\cvec}[1]{{\mathbf #1}}
 \newcommand{\rvec}[1]{\vec{\mathbf #1}}
@@ -125,7 +128,7 @@ sorting=ynt
 \Large Fait par : \\[0.9cm]
 
 
-\LARGE \textbf{Mégane} \textsc{ \textbf{Dieval}}\\  
+\LARGE \textbf{Mégane} \textsc{ \textbf{Diéval}}\\  
 \vspace{0.5cm}
 \LARGE \textbf{Ibrahim} \textsc{ \textbf{Gaizi}}\\
 \vspace{0.5cm}
@@ -146,24 +149,431 @@ sorting=ynt
 
 \end{titlepage}
 
+\newpage
+\renewcommand{\contentsname}{Table des matières}
+\tableofcontents
+\pagebreak
+\chapter*{Introduction et répartition du travail}
+
+La première partie de notre travail consiste à trouver la densité de la distribution postérieure; qui n’est pas une densité standardisée. On précise ensuite le nombre de paramètres pour le modèle non saturé le plus général et on crée la matrice X et le vecteur y associé en prenant en compte des contraintes décrites dans l’énoncé. 
+Vient après l’utilisation de l’algorithme Hastings-Metropolis basé sur une marche aléatoire gaussienne multivariée afin d’obtenir des réalisations provenant approximativement de la distribution postérieure de la cible. Cette méthode est utile dans les cas où les dimensions sont assez grandes, l’avantage aussi avec cette méthode est qu’il n’est pas nécessaire de connaître la distribution qu’on étudie, il suffit de connaître une fonction  qui en est proportionnelle.
+
+
+ La dernière partie de notre travail consiste à  comparer les estimations bayésiennes de $\beta$ avec celle maximum vraisemblance.
+ 
+\vspace{1cm}
+
+ Mégane Diéval s'est chargée de l'ensemble du traitement des données, Ibrahim Gaizi des calculs théoriques de densités. L'algorithme d'Hasting-Metropolis a été réalisé en collaboration entre Ibrahim Gaizi et Mégane Diéval. Oumayma Khalifi a contribué à la rédaction du rapport et aux diverses vérifications (calculs, codes, etc.).
+
+\vspace{10mm}
+\pagebreak
+
+\chapter{Présentation des données et introduction au problème}
+
+
+
+Le modèle log-linéaire décrit les relations entre plusieurs variables qualitatives. On n'y distingue pas de variables explicatives et de variables à expliquer, c'est un modèle d'associations.\\
+
+On s'intéresse au jeu de données $airquality$ présent dans \textbf{R}. Il s'agit de mesures journalières d'ozone, de température maximale, d'ensoleillement et de vent, enregistrées entre mai et septembre 1973 à New York. \\
+Ici, on s'intéressera plus particulièrement aux variables de concentration en ozone, de température maximale (en degrés F) et de mois que l'on notera respectivement $u$, $v$ et $w$. \\ 
+
+\\
+La variable $u$ prend des valeurs entières comprises entre $1$ et $168$, la variable $v$ prend des valeurs entières comprises entre $57$ et $97$ et enfin la variable de mois prend des valeurs entières comprises entre $5$ et $9$. Dans le cadre du modèle log-linéaire on discrétise les variables $u$ et $v$ selon deux classes distinctes dans les deux cas: 
+
+\begin{itemize}
+    \item On sépare $u$ selon les intervalles $[1;31[$ et $[31;168]$ qui lui confèrent donc $2$ modalités
+    \item On sépare $v$ selon les intervalles $[57;79[$ et $[79;97]$ qui lui confèrent donc $2$ modalités
+    \item La variable $w$ est déjà discrète et comporte 5 modalités qui correspondent à chaque mois entre mai et septembre que l'on numérotera de 1 à 5
+\end{itemize}
+
+Le jeu de données initial comporte des mesures sur $153$ jours mais beaucoup de données sont manquantes. On obtient des mesures sur $111$ jours en retirant les lignes pour lesquelles des données sont manquantes pour les variables $u$ et $v$.\\
+
+\newpage
+On peut représenter l'ensemble de ces données dans la table de contingence suivante: 
+
+\vspace{5mm}
+
+\begin{center}
+
+\begin{tabular}{|c|c||c|c|c|c|c|}
+\hline
+Ozone & Température & 1 & 2 & 3 & 4 & 5\\ \hline \hline
+[1;31[ & [57;79[ & 17 & 4 & 2 & 5 & 18\\\hline
+[1;31[ & [79;97] & 0 & 2 & 3 & 3 & 2\\\hline
+[31;168] & [57;79[ & 6 & 1 & 0 & 3 & 1\\ \hline
+[31;168] & [79;97] & 1 & 2 & 21 & 12 & 8\\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{5mm}
+
+Cette table de contingence résume la répartition des données selon les modalités des 3 variables qualitatives, elle possède donc $2 \times 2 \times 5 = 20$ entrées. \\
+On notera les données de cette table $y=(y_1,y_2,\ ...\ ,y_{20})$ où $i=1,2...,20$ sont les indices des données indexées par lignes dans la table de contingence.
+
+\chapter{Choix du modèle d'associations}
+
+Une des modélisation possible de la distribution dans la table de contingence repose sur une loi de Poisson telle que $\forall \ i = 1,...,20$ $y_i \sim  \mathcal{P}(\mu_i) $ avec pour vraisemblance : 
+$$l(\mu|y) = \prod_{i=1}^n \frac{1}{y_i ! } \ \mu_i^{y_i} \ exp(-\mu_i)$$
+En effet, la taille de l'échantillon  n'a pas été décidée à l'avance et est aléatoire de part les valeurs manquantes sur la durée prédéterminée des mesures effectuées.
+Dans ce cas précis où $n=20$, le modèle possède autant de paramètres que d'observations dans la table de contingence, on dit que le modèle est saturé. Aucune contrainte n'étant imposée, il ne reste aucun degré de liberté. Imposer des contraintes et une structure sur les paramètres permettrait d'avoir une description des données plus juste et parcimonieuse.\\
+\\
+Formalisons l'ensemble des élèments dont nous disposons jusqu'à présent:
+\begin{itemize}
+    \item On considère 3 variables qualitatives $u$, $v$ et $w$
+    \item La variable $u$ compte $I=2$ modalités, $v$ compte également $J=2$ modalités et $w$ possède $K=5$ modalités
+    \item La table de contingence du modèle possède $n = I \times J \times K = 20$ cellules
+\end{itemize}
+\\
+\\
+On considérera ici le modèle qui considère toutes les interactions sauf celles à 3 facteurs qui se présente comme le modèle le plus complet si on ne considère pas le modèle saturé.\\
+\\
+On exprime la moyenne du modèle log-linéaire de la façon suivante:
+$$log(\mu_i)=x^T_i \ \beta $$
+où $\mu$ est le vecteur des espérances des effectifs du tableau de contingence. $\beta$ est un paramètre inconnu de dimension $p$.\\
+Ce modèle possède dans notre cas 16 paramètres inconnus à estimer.\\
+La matrice $X$ est de dimension $n\times p$ et contient des variables indicatrices spécifiant les niveaux et les interactions.\\
+
+
+\newpage
+
+\section{Construction de la matrice de design X}
+
+On considère les niveaux et intéractions suivants pour la matrice $X$:
+
+\begin{itemize}
+    \item $X_1$ : l'intercepte qui correspond aux intéractions entre les premières modalités de chaque variable (on les notera $ozo1$, $temp1$ et $month1$)
+    \item $X_2$ : seconde modalité de la variable $ozone$ ($ozo2$)
+    \item $X_3$ : seconde modalité de la variable $temp$ ($temp2$)
+    \item $X_4$ : deuxième modalité de la variable $month$ ($mon2$)
+    \item $X_5$ : troisième modalité de la variable $month$ ($mon3$)
+    \item $X_6$ : quatrième modalité de la variable $month$ ($mon4$)
+    \item $X_7$ : cinquième modalité de la variable $month$ ($mon5$)
+    \item $X_8$ : $ozo2:temp2$ (intéractions entre $ozo2$ et $temp2$)
+    \item $X_9$ : $ozo2:mon2$ (intéractions entre $ozo2$ et $mon2$)
+    \item $X_{10}$ : $ozo2:mon3$ (intéractions entre $ozo2$ et $mon3$)
+    \item $X_{11}$ : $ozo2:mon4$ (intéractions entre $ozo2$ et $mon4$)
+    \item $X_{12}$ : $ozo2:mon5$ (intéractions entre $ozo2$ et $mon5$)
+    \item $X_{13}$ : $temp2:mon2$ (intéractions entre $temp2$ et $mon2$)
+    \item $X_{14}$ : $temp2:mon3$ (intéractions entre $temp2$ et $mon3$)
+    \item $X_{15}$ : $temp2:mon4$ (intéractions entre $temp2$ et $mon4$)
+    \item $X_{16}$ : $temp2:mon5$ (intéractions entre $temp2$ et $mon5$)
+\end{itemize}
+
+\vspace{5mm}
+
+Les lignes de la matrice $X$ seront indexées suivant l'indexation des $y_i$, $i=1,\ ...\ ,20$ et on trouvera en colonne les correspondances de chaque $y_i$ pour chaque $X_j$, $j=1, \ ... \ 16$.\\
+\\
+Par exemple, la seule donnée de la table de contigence qui correspond à $X_1$ est $y_1$ puisqu'elle correspond aux premières modalités de chaque variable.\\
+On trouve pour $X_{12}$ deux données qui lui correspondent à savoir $y_{15}$ et $y_{20}$ qui sont à la fois dans la $5^{ème}$ modalité de la variable $month$ et dans la seconde modalité de la variable $ozone$.\\
+Il y a par exemple et enfin pour la variable $X_{2}$, 10 données qui correspondent à la deuxième modalité de $ozone$ à savoir tous les $y_i$ entre $y_1$ et $y_{10}$. 
+Pour chaque correspondance d'un $y_i$ avec un $X_j$, l'indicatrice prend la valeur 1 et le reste du temps elle reste à 0.\\
+
+\newpage
+
+La matrice de design X pour notre modèle est la suivante : \\
+\\
+
+$$
+\left[
+\begin{array}{*{16}c}
+ 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0  \\
+ 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+ 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+ 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+ 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+ 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+ 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+ 0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+ 0 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+ 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+ 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0  \\
+ 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0  \\
+ 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0  \\
+ 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0  \\
+ 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0  \\
+ 0 & 1 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0  \\
+ 0 & 1 & 1 & 0 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0  \\
+ 0 & 1 & 1 & 0 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0  \\
+ 0 & 1 & 1 & 0 & 0 & 1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0  \\
+ 0 & 1 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1  \\
+\end{array}
+\right]
+$$
+
+
+\newpage
+\section{La distribution à posteriori : la densité cible}
+
+On s'intéresse à l'estimation du vecteur $\beta$ par une méthode bayésienne. \\
+\\
+Rappelons tout d'abord les différentes lois dont nous avons la connaissance: \\
+
+
+--- La loi à priori est la loi de  $\beta | X$ donnée dans l'énoncé   : 
+
+$$ \beta | X \sim \mathcal{N}(0_p,\ n(X^TX)^{-1})  $$
+
+\noindent Il vient alors que : 
+
+$$\pi(\beta|X) =  \frac{1}{ (2\pi)^{\frac{n}{2}} \ |n(X^TX)^{-1} |^{\frac{1}{2}}} \exp(\frac{-1}{2n}(\beta-0_p)^T(X^TX)(\beta-0_p))$$ 
+
+
+\noindent De plus $\pi(\beta|X) \propto \pi(\beta)$ \\
+\\
+
+--- La loi à posteriori du modèle est $\pi(\beta|y)$, c'est elle que nous cherchons à estimer. \\
+
+\\
+
+--- On sait également que $\forall \ i = 1,...,20$ $y_i \sim \mathcal{P}(\mu_i) $ de vraisemblance : 
+
+$$l(\mu|y) = \prod_{i=1}^n \frac{1}{y_i ! } \ \mu_i^{y_i} \ exp(-\mu_i)$$
+
+\noindent Par ailleurs, on a de part le modèle log-linéaire la relation : 
+
+$$log(\mu_i)=x_i^T\beta$$
+
+\noindent Il vient alors que $\mu_i$ = $exp(x_i^T \beta)$, puis que
+
+$$l(\beta|y) = \prod_{i=1}^n \frac{1}{y_i ! } \ exp(x_i^T \beta y_i)\ exp(-exp(x_i^T\beta)) $$ 
+
+\vspace{5mm}
+
+\noindent Finalement, on calcule la densité de la loi à posteriori : \\
+\\
+$$\pi(\beta|y) \propto l(\beta|y)\pi(\beta)$$
+\\
+$$\pi(\beta|y) \propto \frac{1}{ (2\pi)^{\frac{n}{2}} \ |n(X^TX)^{-1} |^{\frac{1}{2}}} \exp(\frac{-1}{2n}\beta^TX^TX\beta) \prod_{i=1}^n \frac{1}{y_i ! } \ exp(x_i^T \beta y_i)\ exp(-exp(x_i^T\beta)) $$
+\\
+
+
+$$\pi(\beta|y) \propto  \exp(\frac{-1}{2n}\beta^TX^TX\beta) \prod_{i=1}^n \frac{1}{y_i ! } \ exp((x_i^T \beta y_i)-exp(x_i^T\beta)) $$
+\\
+$$\pi(\beta|y) \propto \exp(\frac{-1}{2n}\beta^TX^TX\beta)  exp(\sum_{i}^n((x_i^T \beta y_i)-exp(x_i^T\beta))) $$
+\\
+$$\pi(\beta|y) \propto \exp((\frac{-1}{2n}\beta^TX^TX\beta)  + \sum_{i}^n((x_i^T \beta y_i)-exp(x_i^T\beta))) $$
+\vspace{5mm}
+\\
+On obtient alors une densité à posteriori qui ne correspond à aucune densité standard, elle ne peut être estimée par des méthodes classiques.
+
+
+%%%%%%%Ajout du code 
+
+%%%% Méthode 1 : 
+
+
+%%%%%Methode 2 : 
+
+%%\lstinputlisting[language=R, firstline=37, lastline=45]{source.c}
+
+\chapter{L'algorithme d'Hasting-Métropolis}
+
+L'algorithme de Metropolis-Hastings est une méthode permettant d'estimer les paramètres de densités exotiques et dans des grandes dimensions. On rappelle que la matrice $X$ est de dimension $20 \times 16$. Par rapport à la méthode de rejet par exemple, cet algorithme impose moins de conditions sur la densité cible ce qui joue à notre avantage ici puisque notre loi à posteriori est très loin de toute loi usuelle. 
+
+
+\section{Implémentation}
+
+
+
+On cherche donc ici à trouver une estimation de $\beta$.
+Sans rentrer dans les détails du principe de l'algorithme de Hasting-Metropolis, on rappelle toutefois qu'il nécéssite une valeur initiale de $\beta$ pour s'exécuter. On utilisera ici le maximum de vraisemblance d'une loi de poisson puisque l'on a supposé que la distribution dans la table de contingence suivait une telle loi. On estime de la même manière la variance de cet estimateur du maximum de vraisemblance. \\
+\\
+
+Grâce à cette estimation on trouve une valeur de $\hat{\beta}$ valant : 
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+$\hat{\beta_1}$ & $\hat{\beta_2}$ & $\hat{\beta_3}$ & $\hat{\beta_4}$ & $\hat{\beta_5}$ & $\hat{\beta_6}$ & $\hat{\beta_7}$ & $\hat{\beta_8}$\\ \hline
+2.8332133 & 1.7932193 & -4.7369761 & 1.5186208 & 0.4203963 
+& 1.7869701 & 2.8302056 & 2.9349531\\\hline
+$\hat{\beta_9}$ & $\hat{\beta_{10}}$ & $\hat{\beta_{11}}$ & $\hat{\beta_{12}}$ & $\hat{\beta_{13}}$ & $\hat{\beta_{14}}$ & $\hat{\beta_{15}}$ & $\hat{\beta_{16}}$\\\hline
+ -4.1463749 & -2.9529424 & -2.8728100 & -3.9050702 & 3.5788763 &  5.5628749 &  3.6573854 & 3.0222582\\ \hline
+\end{tabular}
+\end{center}
+
+\noindent On choisit de commencer à faire tourner l'algorithme pour 200 itérations. On trouve pour ce nombre d'itérations une estimation de $\beta$ strictement identique à l'estimateur du maximum de vraisemblance. Pour des valeurs plus grandes du nombre d'itérations, les résultats restent strictement les mêmes.
 
 
 
 
 
-\textbf{\textit{Question 1 : }} \\ \\
 
-On a : $$ log(\mu_i)=x_i^T\beta$$
+\section{Interprétation des résultats et conclusion}
 
-Or nous avons $$l(\mu/y)=\prod_{i=1}^n \frac{1}{y_i}(\mu_i^{y_i}exp(-\mu_i)) $$ 
-et on a $$ log(\mu_i)=x_i^T\beta$$
-On applique maintenant la formule de Bayes: 
-$$\pi(\beta,X) = \pi(\beta/X)\pi(X)$$
-$$\pi(\beta/y) \propto l(\beta/y)\pi(\beta) $$
-$$\propto \prod_{i=1}^n \frac{1}{y_i} \exp(y_i X_i^T\beta)\exp(-\exp(X_i^T\beta))\frac{\sqrt{n}}{\sqrt{2\pi}} (X¨TX)^{\frac{1}{2}} \exp(-\frac{1}{2}(X_i^TX^TXX_i) $$
-$$\propto (X^TX)^{\frac{1}{2}}\exp(\sum_{i=1}^n y_i X_i^T\beta-\exp(\x_i^T\beta-\frac{1}{2}X_i^T(X^TX)X_i)$$
+Finalement, pour des valeurs du nombre d'itérations comprises entre 200 et 20000, l'algorithme stagne au point $\beta=\hat{\beta}$ estimé par le maximum de vraisemblance, autrement dit on peut supposer que :  $$\forall  \ N_{iter}, \ \forall \ t \in [1, N_{iter}], \ \beta[t]=\beta[t-1]$$ Le nombre d'itérations n'influe donc pas sur la valeur de l'estimateur d'Hasting-Metropolis. D'où vient le problème ? \\
+\\
+Si l'algorithme ne "décolle" pas du $\beta$ initial, c'est qu'à aucun moment la valeur de $\rho$ n'est supérieure aux valeurs d'une distribution de loi uniforme. On rappelle que $\rho$ est le rapport entre la densité à posteriori au point $\beta[t]$ et au point $\beta[t-1]$.
+\\
+On constate toutefois que pour des valeurs bien particulières de $\beta[0]$, l'algorithme converge vers une autre valeur de $\beta$. Par exemple c'est le cas pour $\beta[0]=0_p$.
+
+\newpage
+
+\addcontentsline{toc}{section}{Bibliographie}
+\label{sec:ref}
+\section*{Bibliographie}
+\vspace{1cm}
+[1] Jean-Michel Marin, \textit{Monte Carlo and Markov chain Monte Carlo
+methods}, 2020.
+\newline
+[2] Jean-Michel Marin, \textit{Modèle linéaire généralisé}.
+\pagebreak
+
+\begin{appendix}
+\section*{Annexe}
+\begin{lstlisting}{source.r}
 
 
+
+#import the data set
+data("airquality")
+data <- airquality
+
+#We want to build a contingency table 
+#with dichotomous variables
+#The samples we care about are
+#Temperature : temp (v)
+#Ozone : ozone (u)
+#Month : month (w)
+
+#first step : drop all NA values
+
+data <- data[!is.na(data$Ozone),]
+data <- data[!is.na(data$Solar.R),]
+
+#111 row now
+rownames(data) <- 1:111
+data <- cbind(data$Ozone, data$Temp, data$Month)
+
+#second step : process u et v into dichotomous samples
+
+#u process
+#first class [1, 31] #0
+#second class (31, 168] #1
+
+u <- rep(0, length(data[,1]))
+for (i in 1:length(data[,1])){
+  if (data[i,1]>31) 
+  {u[i] <- 1
+    }
+  else u[i] <- u[i]
+}
+
+#v process
+#first class [57, 79] #0
+#second class (79, 97] #1
+
+v <- rep(0, length(data[,2]))
+for (i in 1:length(data[,2])){
+  if (data[i,2]>79) 
+  {v[i] <- 1
+  }
+  else v[i] <- v[i]
+}
+
+#last sample we care about for our contingency table
+#month
+
+df <- cbind(u,v, data[,3])
+
+#contingency table 
+cont <- table(df[,1], df[,2], df[,3])
+
+#else we just copy the table in instructions
+
+copy <- cbind(c(17,0,6,1),c(4,2,1,2),c(2,3,0,21),
+              c(5,3,3,12),c(18,2,1,8))
+
+#y vector 
+
+y <- c(17, 4, 2, 5, 18, 0, 2, 3, 3, 2, 6, 1, 0, 3, 1, 1, 2, 21, 12, 8)
+
+#design matrix X 
+
+X <- matrix(data = 0, nrow = 20, ncol = 16)
+colnames(X) <- c('X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8',
+                 'X9', 'X10', 'X11', 'X12', 'X13', 'X14', 'X15', 'X16')
+
+X[1,1] <- 1 #y1 est la seule donn?e qui est dans l'intercept
+#le reste est ? 0 dans X1
+#X2 est l'indicatrice pour la deuxi?me modalit? de ozone
+#Les 10 derni?res donn?es y11 ? y20 sont dans ozo2
+X[11:20,2] <- c(rep(1, 10))
+#X3 est l'indicatrice pour la deuxi?me modalit? de temp
+#les 6 ? 10?me et 16 ? 20?me valeurs sont dans temp2
+X[6:10, 3] <- c(rep(1, 5))
+X[16:20, 3] <- c(rep(1, 5))
+#X4 correspond ? la deuxi?me modalit? de month
+X[c(2,7,12,17),4] <- c(rep(1,4))
+#X5 correspond ? la troisi?me modalit? de month
+X[c(3,8,13,18),5] <- c(rep(1,4))
+#X6 correspond ? la quatri?me modalit? de month
+X[c(4,9,14,19),6] <- c(rep(1,4))
+#X7 correspond ? la cinqui?me modalit? de month
+X[c(5,10,15,20),7] <- c(rep(1,4))
+#X8 interactions entre ozo2 et temp 2
+X[16:20, 8] <- c(rep(1,5))
+#X9 interactions entre ozo2 et month2
+X[c(12,17), 9] <- c(1,1)
+#X10 interactions entre ozo2 et month3
+X[c(13,18), 10] <- c(1,1)
+#X11 ozo2:mon4
+X[c(14,19), 11] <- c(1,1)
+#X12 ozo2:mon5
+X[c(15,20), 12] <- c(1,1)
+#X13 temp2:mon2
+X[c(7,17), 13] <- c(1,1)
+#X14 temp2:mon3
+X[c(8,18), 14] <- c(1,1)
+#X15 temp2:mon4
+X[c(9,19), 15] <- c(1,1)
+#X16 temp2:mon5
+X[c(10,20), 16] <- c(1,1)
+
+
+#initialisation 
+n=20
+p=16
+Var <- n*solve(t(X)%*%X)
+mean <- rep(0,16)
+Niter <- 200
+
+#target 
+
+cible <- function(x){
+  A <- (-1/(2*n))*t(x)%*%t(X)%*%X%*%x
+  for (i in 1:n){
+    A <- A + t(X[i,])%*%x%*%y[i] - exp(t(X[i,]%*%x))
+  }
+  dens <- exp(A)
+  return(dens)
+}
+
+#beta initialization
+mod <- summary(glm(y~-1+X,family=poisson()))
+
+Bchap <- mod$coeff[,1]
+Schap <- mod$cov.unscaled
+
+#Beta initialization
+Beta <- matrix(0,Niter,16)
+Beta[1,] <- rep(1,16)
+
+library(MASS)
+
+for (i in 2:Niter){
+  Beta_tilde <- mvrnorm(1,mean,Var)
+  rho <- cible(Beta_tilde)/cible(Beta[i-1,])
+  U <- runif(1)
+  if (U<=rho) Beta[i,]=Beta_tilde
+  else Beta[i,]=Beta[i-1,]
+  if (i==Niter) print(Beta[Niter,])}
+
+
+\end{lstlisting}
+
+\end{appendix}
+%\printbibliography      %%Si bibliographie a faire%%
 
 \end{document}
 
